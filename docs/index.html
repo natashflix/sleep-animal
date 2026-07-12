@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#6c5ce7" />
+  <title>Какое ты сегодня животное?</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(160deg, #6c5ce7 0%, #341f97 100%);
+      color: #fff;
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      padding: 28px 24px 32px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    .subtitle { opacity: 0.75; font-size: 14px; margin-bottom: 24px; }
+    .hours-value { font-size: 56px; font-weight: 800; line-height: 1; margin: 8px 0; }
+    .hours-label { opacity: 0.7; font-size: 14px; margin-bottom: 20px; }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.25);
+      outline: none;
+      margin: 8px 0 24px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 32px; height: 32px; border: none;
+      border-radius: 50%; background: #fff; cursor: pointer;
+    }
+    button {
+      width: 100%;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #341f97;
+      background: #fff;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform 0.08s ease;
+    }
+    button:active { transform: scale(0.97); }
+    .result {
+      margin-top: 26px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .result.show { opacity: 1; transform: translateY(0); }
+    .emoji {
+      font-size: 88px;
+      line-height: 1;
+      margin-bottom: 8px;
+      display: inline-block;
+      animation: dance 1.1s ease-in-out infinite;
+    }
+    @keyframes dance {
+      0%   { transform: translateY(0)    rotate(0deg)   scale(1); }
+      25%  { transform: translateY(-14px) rotate(-8deg) scale(1.08); }
+      50%  { transform: translateY(0)    rotate(0deg)   scale(1); }
+      75%  { transform: translateY(-8px) rotate(8deg)   scale(1.04); }
+      100% { transform: translateY(0)    rotate(0deg)   scale(1); }
+    }
+    .animal-name { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+    .animal-desc { font-size: 15px; opacity: 0.85; line-height: 1.4; }
+    .fact {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: rgba(0, 0, 0, 0.22);
+      border-left: 3px solid #ffeaa7;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.45;
+      text-align: left;
+    }
+    .fact b { color: #ffeaa7; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Какое ты сегодня животное?</h1>
+    <div class="subtitle">Скажи, сколько часов ты спал этой ночью</div>
+
+    <div class="hours-value" id="hoursValue">7.0</div>
+    <div class="hours-label">часов сна</div>
+
+    <input type="range" id="slider" min="0" max="12" step="0.5" value="7" />
+
+    <button id="revealBtn">Узнать животное</button>
+
+    <div class="result" id="result">
+      <div class="emoji" id="emoji"></div>
+      <div class="animal-name" id="animalName"></div>
+      <div class="animal-desc" id="animalDesc"></div>
+      <div class="fact" id="animalFact"></div>
+    </div>
+  </div>
+
+  <script>
+    const animals = [
+      { max: 2,  emoji: "🧟", name: "Зомби",        desc: "Ты почти не спал. Двигаешься на автопилоте и мечтаешь о подушке.",
+        fact: "Твой мозг сейчас работает как телефон на 3% — вроде включён, но лучше ничего важного не трогать. Решения, принятые сегодня, ты будешь оправдывать всю неделю." },
+      { max: 4,  emoji: "🦥", name: "Ленивец",      desc: "Всё медленно и вдумчиво. Спешить сегодня — не твой вариант.",
+        fact: "Ты не ленивый, ты — энергосберегающий. По крайней мере так звучит красивее, чем «не смог заставить себя встать со стула четыре часа»." },
+      { max: 5,  emoji: "🦉", name: "Сова",         desc: "Не выспался, но держишься на кофеине и силе воли.",
+        fact: "Кофе — это не бодрость, это кредит у завтрашнего тебя под грабительский процент. Завтрашний ты уже в курсе и готовит претензию." },
+      { max: 6,  emoji: "🐱", name: "Сонный кот",   desc: "Готов работать 4 часа и спать 20. Найди тёплое местечко.",
+        fact: "Ты выглядишь занятым, но на самом деле просто ищешь предлог прилечь. Не переживай, коты за это получают лайки, а ты — дедлайны." },
+      { max: 7,  emoji: "🦊", name: "Лиса",         desc: "Хитрый и собранный. Энергии хватает, если не расслабляться.",
+        fact: "Семь часов — это «нормально», то есть ровно столько, чтобы функционировать, но недостаточно, чтобы перестать листать ленту в час ночи. Ты знаешь, о чём я." },
+      { max: 8,  emoji: "🐶", name: "Бодрый пёс",   desc: "Отлично выспался! Готов радоваться жизни и всех обнять.",
+        fact: "Восемь часов сна и хорошее настроение — статистически ты сегодня раздражаешь всех невыспавшихся вокруг. Веди себя тихо, героям тут не рады." },
+      { max: 9,  emoji: "🐬", name: "Дельфин",      desc: "На пике формы: умный, быстрый и в хорошем настроении.",
+        fact: "Ты выспался, ты продуктивен, ты собран. Наслаждайся — по закону подлости именно сегодня ничего важного не запланировано." },
+      { max: 10, emoji: "🐼", name: "Панда",        desc: "Спал долго и сладко. Спокойствие и добродушие — твоё всё.",
+        fact: "Десять часов сна в будний день — это либо выходной, либо ты избегаешь чего-то очень важного. Кровать тебя не спасёт, но попытка засчитана." },
+      { max: 99, emoji: "🐻", name: "Медведь",      desc: "Ты в спячке! Проспал так долго, что весна уже прошла.",
+        fact: "Поздравляю, ты проспал не усталость, а целый день своей жизни. Дни рождения теперь можно праздновать раз в полгода — так быстрее." },
+    ];
+
+    const slider = document.getElementById("slider");
+    const hoursValue = document.getElementById("hoursValue");
+    const result = document.getElementById("result");
+    const emoji = document.getElementById("emoji");
+    const animalName = document.getElementById("animalName");
+    const animalDesc = document.getElementById("animalDesc");
+    const animalFact = document.getElementById("animalFact");
+
+    function pickAnimal(hours) {
+      return animals.find(a => hours < a.max) || animals[animals.length - 1];
+    }
+
+    slider.addEventListener("input", () => {
+      hoursValue.textContent = parseFloat(slider.value).toFixed(1);
+      result.classList.remove("show");
+    });
+
+    document.getElementById("revealBtn").addEventListener("click", () => {
+      const hours = parseFloat(slider.value);
+      const a = pickAnimal(hours);
+      emoji.textContent = a.emoji;
+      animalName.textContent = a.name;
+      animalDesc.textContent = a.desc;
+      animalFact.innerHTML = "<b>Факт дня:</b> " + a.fact;
+      result.classList.remove("show");
+      void result.offsetWidth;
+      result.classList.add("show");
+    });
+  </script>
+</body>
+</html>
