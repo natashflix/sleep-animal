@@ -135,7 +135,7 @@
       <div style="display:flex;gap:10px">
         <button class="btn gold" style="margin-top:6px" onclick="pickPlayer('Костя')">👨 Костя</button>
         <button class="btn gold" style="margin-top:6px" onclick="pickPlayer('Юля')">👩 Юля</button>
-        <button class="btn gold" style="margin-top:6px" onclick="pickPlayer('Ама')">🧕 Ама</button>
+        <button class="btn gold" style="margin-top:6px" onclick="pickPlayer('Мама')">👩‍🦰 Мама</button>
       </div>
       <button class="btn ghost sm" onclick="go('board')">🏆 Турнирная таблица</button>
       <div class="foot">3 игрока · 7 уровней · кто наберёт больше звёзд — тот победил</div>
@@ -252,7 +252,7 @@ function pickPlayer(name){
   go('map');
 }
 
-const PLAYERS = [{n:'Костя',em:'👨'},{n:'Юля',em:'👩'},{n:'Ама',em:'🧕'}];
+const PLAYERS = [{n:'Костя',em:'👨'},{n:'Юля',em:'👩'},{n:'Мама',em:'👩‍🦰'}];
 
 /* ---------- nav ---------- */
 function go(name){
@@ -488,7 +488,7 @@ function afterDone(){
 
 function renderFinal(){
   const nameEl=document.getElementById('fName');
-  const fem = (player==='Юля'||player==='Ама');
+  const fem = (player==='Юля'||player==='Мама');
   if(nameEl) nameEl.textContent = player? player+', ты готов'+(fem?'а':'')+' к Вьетнаму!' : 'Ты готов(а) к Вьетнаму!';
   const st=totalStars();
   document.getElementById('fStars').textContent = st;
