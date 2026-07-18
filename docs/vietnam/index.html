@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🇻🇳 Первая поездка во Вьетнам — игра-подготовка</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root{
+    --bg1:#0b3d2e; --bg2:#12734f; --gold:#ffce00; --red:#da251d;
+    --card:#ffffff; --ink:#12251c; --muted:#5c6f66; --ok:#1fae5a; --bad:#e23b3b;
+    --shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    color:var(--ink);
+    min-height:100%;
+    display:flex;justify-content:center;
+    padding:16px;
+  }
+  #app{width:100%;max-width:460px;}
+  .screen{display:none;animation:pop .35s ease;}
+  .screen.active{display:block;}
+  @keyframes pop{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .card{
+    background:var(--card);border-radius:22px;padding:22px;box-shadow:var(--shadow);
+  }
+  h1{font-size:26px;margin:0 0 6px;line-height:1.15;}
+  h2{font-size:21px;margin:0 0 12px;}
+  p{line-height:1.5;color:var(--muted);margin:8px 0;}
+  .flag{font-size:56px;text-align:center;margin:6px 0;}
+  .btn{
+    display:block;width:100%;border:0;border-radius:16px;padding:16px;
+    font-size:17px;font-weight:700;cursor:pointer;margin-top:12px;
+    background:var(--red);color:#fff;transition:transform .1s, filter .2s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn.gold{background:var(--gold);color:#3a2c00;}
+  .btn.ghost{background:#eef3f0;color:var(--ink);}
+  .btn.sm{padding:11px;font-size:15px;margin-top:8px;}
+  .top{
+    display:flex;align-items:center;gap:10px;margin-bottom:14px;color:#eafff4;
+  }
+  .top .lvl{font-weight:800;font-size:14px;opacity:.9;}
+  .bar{flex:1;height:9px;background:rgba(255,255,255,.25);border-radius:9px;overflow:hidden;}
+  .bar > i{display:block;height:100%;width:0;background:var(--gold);transition:width .4s;}
+  .stars{color:var(--gold);font-size:15px;}
+  .q{font-size:19px;font-weight:700;margin:2px 0 14px;line-height:1.35;}
+  .opt{
+    display:flex;align-items:center;gap:10px;
+    background:#f4f8f6;border:2px solid transparent;border-radius:14px;
+    padding:14px;margin-top:10px;cursor:pointer;font-size:16px;font-weight:600;
+    transition:.15s;
+  }
+  .opt:active{transform:scale(.98);}
+  .opt.correct{background:#e3f9ec;border-color:var(--ok);}
+  .opt.wrong{background:#fdeaea;border-color:var(--bad);}
+  .opt .em{font-size:22px;}
+  .feedback{
+    margin-top:14px;padding:14px;border-radius:14px;font-size:15px;line-height:1.5;
+    background:#fff8e1;color:#5b4a00;display:none;
+  }
+  .feedback.show{display:block;animation:pop .25s;}
+  .feedback b{color:#3a2c00;}
+  .badge{
+    display:inline-block;background:var(--gold);color:#3a2c00;font-weight:800;
+    padding:4px 12px;border-radius:20px;font-size:13px;margin-bottom:8px;
+  }
+  .map{display:flex;flex-direction:column;gap:12px;margin-top:6px;}
+  .node{
+    display:flex;align-items:center;gap:14px;background:var(--card);
+    border-radius:18px;padding:14px 16px;box-shadow:var(--shadow);cursor:pointer;
+    transition:transform .1s;position:relative;
+  }
+  .node:active{transform:scale(.98);}
+  .node.locked{opacity:.5;filter:grayscale(.6);cursor:not-allowed;}
+  .node .ic{font-size:30px;width:44px;text-align:center;}
+  .node .t{font-weight:800;font-size:16px;}
+  .node .s{font-size:13px;color:var(--muted);}
+  .node .chk{margin-left:auto;font-size:22px;}
+  .center{text-align:center;}
+  .big{font-size:44px;margin:8px 0;}
+  .pill{display:inline-block;background:#eef3f0;border-radius:20px;padding:6px 14px;margin:4px;font-weight:700;font-size:14px;}
+  .swipe-card{
+    background:linear-gradient(160deg,#fff,#f0f6f2);border-radius:20px;padding:26px 20px;
+    text-align:center;box-shadow:var(--shadow);min-height:190px;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .swipe-card .em{font-size:60px;}
+  .swipe-card .nm{font-size:22px;font-weight:800;margin-top:8px;}
+  .swipe-btns{display:flex;gap:12px;margin-top:14px;}
+  .swipe-btns .btn{margin-top:0;}
+  .kpi{display:flex;justify-content:space-around;text-align:center;margin:10px 0;}
+  .kpi div span{display:block;font-size:26px;font-weight:800;color:var(--bg2);}
+  .kpi div small{color:var(--muted);}
+  .match-wrap{display:flex;gap:10px;}
+  .match-col{flex:1;display:flex;flex-direction:column;gap:9px;}
+  .chip{
+    background:#f4f8f6;border:2px solid transparent;border-radius:12px;padding:12px 10px;
+    text-align:center;font-weight:700;font-size:14px;cursor:pointer;transition:.15s;min-height:48px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .chip.sel{border-color:var(--bg2);background:#e6f3ec;}
+  .chip.done{background:#e3f9ec;border-color:var(--ok);color:#0a6b38;cursor:default;}
+  .chip.miss{animation:shake .3s;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .hint{font-size:13px;color:var(--muted);text-align:center;margin-top:10px;}
+  .tag{font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--gold);text-transform:uppercase;}
+  .foot{text-align:center;color:#cdeadd;font-size:12px;margin-top:14px;}
+  .cert{
+    background:linear-gradient(160deg,#fffdf5,#fff4d1);border:3px solid var(--gold);
+    border-radius:20px;padding:24px;text-align:center;box-shadow:var(--shadow);
+  }
+  .cert h2{color:#3a2c00;}
+  .confetti{position:fixed;top:-10px;font-size:20px;animation:fall 2.6s linear forwards;pointer-events:none;z-index:99;}
+  @keyframes fall{to{transform:translateY(105vh) rotate(360deg);opacity:.9;}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- START -->
+  <section id="s-start" class="screen active">
+    <div class="card center">
+      <div class="flag">🇻🇳</div>
+      <h1>Первая поездка<br>во Вьетнам</h1>
+      <p>Мини-игры, проходя которые ты по-настоящему подготовишься: документы, донги, язык, еда, дорога и хитрости для туристов.</p>
+      <div>
+        <span class="pill">📄 Виза</span><span class="pill">💵 Донги</span><span class="pill">🗣️ Язык</span>
+        <span class="pill">🍜 Еда</span><span class="pill">🛵 Дорога</span><span class="pill">🙏 Этикет</span>
+      </div>
+      <p style="margin-top:16px;font-weight:800;color:var(--ink)">Кто играет?</p>
+      <div style="display:flex;gap:12px">
+        <button class="btn gold" style="margin-top:6px" onclick="pickPlayer('Костя')">👨 Костя</button>
+        <button class="btn gold" style="margin-top:6px" onclick="pickPlayer('Юля')">👩 Юля</button>
+      </div>
+      <div class="foot">7 уровней · собери все звёзды · получи «паспорт готовности»</div>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section id="s-map" class="screen">
+    <div class="top">
+      <span id="mapWho" class="lvl">Твой прогресс</span>
+      <div class="bar"><i id="mapbar"></i></div>
+      <span id="mapstars" class="stars">☆ 0</span>
+    </div>
+    <div id="map" class="map"></div>
+  </section>
+
+  <!-- GENERIC GAME SCREEN -->
+  <section id="s-game" class="screen">
+    <div class="top">
+      <span id="gLvl" class="lvl"></span>
+      <div class="bar"><i id="gbar"></i></div>
+      <span id="gScore" class="stars"></span>
+    </div>
+    <div class="card">
+      <div id="gTag" class="tag"></div>
+      <div id="gBody"></div>
+    </div>
+  </section>
+
+  <!-- LEVEL DONE -->
+  <section id="s-done" class="screen">
+    <div class="card center">
+      <div class="big" id="dEmoji">🎉</div>
+      <span class="badge" id="dBadge">Уровень пройден</span>
+      <h2 id="dTitle"></h2>
+      <div class="stars" id="dStars" style="font-size:28px"></div>
+      <p id="dTip"></p>
+      <button class="btn" id="dNext" onclick="afterDone()">Дальше →</button>
+      <button class="btn ghost sm" onclick="go('map')">На карту</button>
+    </div>
+  </section>
+
+  <!-- FINAL -->
+  <section id="s-final" class="screen">
+    <div class="cert">
+      <div class="flag">🛂</div>
+      <div class="badge">Паспорт готовности</div>
+      <h2 id="fName">Ты готов(а) к Вьетнаму!</h2>
+      <div class="kpi">
+        <div><span id="fStars">0</span><small>звёзд</small></div>
+        <div><span id="fPct">0%</span><small>подготовка</small></div>
+      </div>
+      <p id="fWord"></p>
+      <div style="text-align:left;background:#fff;border-radius:14px;padding:14px;margin-top:10px">
+        <b>📌 Финальный чек-лист перед вылетом:</b>
+        <div style="font-size:14px;line-height:1.9;margin-top:6px">
+          ✅ Загранпаспорт (действ. 6+ мес.) + е-виза распечатана<br>
+          ✅ Медстраховка + копии документов в телефоне<br>
+          ✅ Наличные USD для обмена + карта<br>
+          ✅ Установлен Grab и офлайн-карты (Maps.me)<br>
+          ✅ Репелленты, солнцезащита, аптечка<br>
+          ✅ Переходник не нужен (розетки как у нас, тип A/C)
+        </div>
+      </div>
+      <button class="btn gold" onclick="restart()">Сыграть заново 🔁</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ---------- state ---------- */
+const LEVELS = [
+  {id:'docs', ic:'📄', t:'Документы и виза', s:'Что взять и оформить', tag:'Уровень 1 · Сборы'},
+  {id:'money',ic:'💵', t:'Вьетнамские донги', s:'Не запутайся в нулях', tag:'Уровень 2 · Деньги'},
+  {id:'lang', ic:'🗣️', t:'Первые слова', s:'Соедини фразы', tag:'Уровень 3 · Язык'},
+  {id:'food', ic:'🍜', t:'Уличная еда', s:'Пробовать или нет?', tag:'Уровень 4 · Кухня'},
+  {id:'road', ic:'🛵', t:'Дорога и транспорт', s:'Перейди улицу и не только', tag:'Уровень 5 · Движение'},
+  {id:'culture',ic:'🙏',t:'Этикет и культура', s:'Как себя вести', tag:'Уровень 6 · Уважение'},
+  {id:'scam', ic:'🕵️', t:'Разводы туристов', s:'Не дай себя обмануть', tag:'Уровень 7 · Хитрости'},
+];
+let progress = {}; // id -> stars(0..3)
+let player = '';
+let cur = null, gi = 0, gScore = 0, gTotal = 0;
+
+function load(){
+  try{progress = JSON.parse(localStorage.getItem('vn_prog')||'{}');}catch(e){progress={};}
+  player = localStorage.getItem('vn_player')||'';
+}
+function save(){
+  localStorage.setItem('vn_prog', JSON.stringify(progress));
+  localStorage.setItem('vn_player', player);
+  if(player) localStorage.setItem('vn_prog_'+player, JSON.stringify(progress));
+}
+load();
+
+function pickPlayer(name){
+  player = name;
+  // отдельный прогресс для каждого игрока
+  try{progress = JSON.parse(localStorage.getItem('vn_prog_'+name)||'{}');}catch(e){progress={};}
+  save();
+  go('map');
+}
+
+/* ---------- nav ---------- */
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+name).classList.add('active');
+  window.scrollTo(0,0);
+  if(name==='map') renderMap();
+  if(name==='final') renderFinal();
+}
+function totalStars(){ return Object.values(progress).reduce((a,b)=>a+b,0); }
+function maxStars(){ return LEVELS.length*3; }
+
+function renderMap(){
+  const done = LEVELS.filter(l=>progress[l.id]!==undefined).length;
+  const who = document.getElementById('mapWho');
+  if(who) who.textContent = player? player+', вперёд!' : 'Твой прогресс';
+  document.getElementById('mapbar').style.width = (done/LEVELS.length*100)+'%';
+  document.getElementById('mapstars').textContent = '★ '+totalStars()+'/'+maxStars();
+  const m = document.getElementById('map'); m.innerHTML='';
+  LEVELS.forEach((l,idx)=>{
+    const unlocked = idx===0 || progress[LEVELS[idx-1].id]!==undefined;
+    const st = progress[l.id];
+    const node = document.createElement('div');
+    node.className = 'node'+(unlocked?'':' locked');
+    node.innerHTML = `<div class="ic">${l.ic}</div>
+      <div><div class="t">${l.t}</div><div class="s">${l.s}</div></div>
+      <div class="chk">${st!==undefined? '★'.repeat(st)+'☆'.repeat(3-st) : (unlocked?'▶️':'🔒')}</div>`;
+    if(unlocked) node.onclick=()=>startLevel(l.id);
+    m.appendChild(node);
+  });
+  // all done?
+  if(LEVELS.every(l=>progress[l.id]!==undefined)){
+    const b=document.createElement('button');
+    b.className='btn gold'; b.textContent='🛂 Получить паспорт готовности';
+    b.onclick=()=>go('final'); m.appendChild(b);
+  }
+}
+
+/* ---------- level engine ---------- */
+function startLevel(id){
+  cur = id; gi=0; gScore=0;
+  const q = QUIZ[id];
+  gTotal = q.length;
+  const L = LEVELS.find(l=>l.id===id);
+  document.getElementById('gLvl').textContent = L.tag;
+  document.getElementById('gTag').textContent = L.ic+'  '+L.t;
+  go('game');
+  renderStep();
+}
+function updGTop(){
+  document.getElementById('gbar').style.width = (gi/gTotal*100)+'%';
+  document.getElementById('gScore').textContent = '★ '+gScore+'/'+gTotal;
+}
+function renderStep(){
+  updGTop();
+  const item = QUIZ[cur][gi];
+  const body = document.getElementById('gBody');
+  if(!item){ return finishLevel(); }
+  if(item.type==='mc') return renderMC(item, body);
+  if(item.type==='swipe') return renderSwipe(item, body);
+  if(item.type==='match') return renderMatch(item, body);
+}
+
+/* multiple choice */
+function renderMC(item, body){
+  body.innerHTML = `<div class="q">${item.q}</div><div id="opts"></div>
+    <div class="feedback" id="fb"></div>`;
+  const opts = document.getElementById('opts');
+  item.a.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='opt';
+    d.innerHTML=`<span class="em">${o.em||'▫️'}</span><span>${o.t}</span>`;
+    d.onclick=()=>{
+      if(d.dataset.locked) return;
+      [...opts.children].forEach(c=>c.dataset.locked='1');
+      const ok = o.c===true;
+      d.classList.add(ok?'correct':'wrong');
+      if(!ok){ // highlight correct
+        item.a.forEach((oo,j)=>{ if(oo.c) opts.children[j].classList.add('correct'); });
+      } else gScore++;
+      const fb=document.getElementById('fb');
+      fb.innerHTML = (ok?'✅ <b>Верно!</b> ':'❌ <b>Почти.</b> ')+item.exp;
+      fb.classList.add('show');
+      addNext();
+    };
+    opts.appendChild(d);
+  });
+}
+
+/* swipe try/avoid */
+function renderSwipe(item, body){
+  body.innerHTML = `<div class="swipe-card">
+      <div class="em">${item.em}</div>
+      <div class="nm">${item.nm}</div>
+      <div style="color:var(--muted);font-size:14px;margin-top:4px">${item.sub||''}</div>
+    </div>
+    <div class="swipe-btns">
+      <button class="btn ghost" id="bAvoid">🚫 Осторожно</button>
+      <button class="btn gold" id="bTry">😋 Смело</button>
+    </div>
+    <div class="feedback" id="fb"></div>`;
+  const decide=(tryIt)=>{
+    document.getElementById('bTry').disabled=true;
+    document.getElementById('bAvoid').disabled=true;
+    const ok = tryIt===item.good;
+    if(ok) gScore++;
+    const fb=document.getElementById('fb');
+    fb.innerHTML=(ok?'✅ <b>Точно!</b> ':'❌ <b>Не совсем.</b> ')+item.exp;
+    fb.classList.add('show'); addNext();
+  };
+  document.getElementById('bTry').onclick=()=>decide(true);
+  document.getElementById('bAvoid').onclick=()=>decide(false);
+}
+
+/* match two columns */
+function renderMatch(item, body){
+  const right = item.pairs.map((p,i)=>({t:p[1],i})).sort((a,b)=>((a.i*7+3)%5)-((b.i*7+3)%5));
+  body.innerHTML = `<div class="q">${item.q}</div>
+    <div class="match-wrap">
+      <div class="match-col" id="colL"></div>
+      <div class="match-col" id="colR"></div>
+    </div>
+    <div class="hint">Тапни фразу слева, потом её перевод справа</div>
+    <div class="feedback" id="fb"></div>`;
+  const L=document.getElementById('colL'), R=document.getElementById('colR');
+  item.pairs.forEach((p,i)=>{
+    const c=document.createElement('div'); c.className='chip'; c.textContent=p[0]; c.dataset.i=i; c.dataset.side='L';
+    c.onclick=()=>pick(c); L.appendChild(c);
+  });
+  right.forEach(r=>{
+    const c=document.createElement('div'); c.className='chip'; c.textContent=r.t; c.dataset.i=r.i; c.dataset.side='R';
+    c.onclick=()=>pick(c); R.appendChild(c);
+  });
+  let selL=null, selR=null, matched=0;
+  function pick(c){
+    if(c.classList.contains('done')) return;
+    if(c.dataset.side==='L'){ if(selL)selL.classList.remove('sel'); selL=c; c.classList.add('sel'); }
+    else { if(selR)selR.classList.remove('sel'); selR=c; c.classList.add('sel'); }
+    if(selL&&selR){
+      if(selL.dataset.i===selR.dataset.i){
+        selL.classList.remove('sel'); selR.classList.remove('sel');
+        selL.classList.add('done'); selR.classList.add('done');
+        selL=selR=null; matched++;
+        if(matched===item.pairs.length){
+          gScore++;
+          const fb=document.getElementById('fb');
+          fb.innerHTML='✅ <b>Все пары верны!</b> '+item.exp; fb.classList.add('show'); addNext();
+        }
+      } else {
+        const a=selL,b=selR; a.classList.add('miss'); b.classList.add('miss');
+        setTimeout(()=>{a.classList.remove('miss','sel');b.classList.remove('miss','sel');},350);
+        selL=selR=null;
+      }
+    }
+  }
+}
+
+function addNext(){
+  const body=document.getElementById('gBody');
+  if(document.getElementById('nextBtn')) return;
+  const b=document.createElement('button');
+  b.className='btn'; b.id='nextBtn';
+  b.textContent = (gi+1>=gTotal)?'Завершить уровень ✓':'Дальше →';
+  b.onclick=()=>{ gi++; renderStep(); };
+  body.appendChild(b);
+}
+
+function finishLevel(){
+  // stars: 3 if all, 2 if >=2/3, 1 otherwise (min 1 for finishing)
+  const ratio = gScore/gTotal;
+  let stars = ratio>=0.99?3 : ratio>=0.6?2 : 1;
+  const prev = progress[cur] ?? -1;
+  if(stars>prev){ progress[cur]=stars; save(); } else { progress[cur]=progress[cur]??stars; save(); }
+  const L=LEVELS.find(l=>l.id===cur);
+  document.getElementById('dEmoji').textContent = stars===3?'🌟':(stars===2?'✨':'👍');
+  document.getElementById('dTitle').textContent = L.t;
+  document.getElementById('dStars').textContent = '★'.repeat(stars)+'☆'.repeat(3-stars);
+  document.getElementById('dTip').innerHTML = TIPS[cur];
+  const idx = LEVELS.findIndex(l=>l.id===cur);
+  const last = idx===LEVELS.length-1;
+  document.getElementById('dNext').textContent = last? 'Финал 🛂' : 'Следующий уровень →';
+  window._nextLevel = last? null : LEVELS[idx+1].id;
+  confetti();
+  go('done');
+}
+function afterDone(){
+  if(window._nextLevel){ startLevel(window._nextLevel); }
+  else go('final');
+}
+
+function renderFinal(){
+  const nameEl=document.getElementById('fName');
+  if(nameEl) nameEl.textContent = player? player+', ты готов'+(player==='Юля'?'а':'')+' к Вьетнаму!' : 'Ты готов(а) к Вьетнаму!';
+  const st=totalStars();
+  document.getElementById('fStars').textContent = st;
+  const pct = Math.round(st/maxStars()*100);
+  document.getElementById('fPct').textContent = pct+'%';
+  let word = pct>=95?'Идеально! Ты знаешь Вьетнам лучше многих. Счастливого пути! 🌴'
+           : pct>=70?'Отличная подготовка — можно смело брать билеты. ✈️'
+           : 'Хорошее начало! Пройди уровни ещё раз на 3 звезды. 💪';
+  document.getElementById('fWord').textContent = word;
+  confetti();
+}
+function restart(){ progress={}; save(); go('map'); }
+
+function confetti(){
+  const em=['🎉','⭐','🌟','🇻🇳','🏵️','✨'];
+  for(let i=0;i<26;i++){
+    const d=document.createElement('div'); d.className='confetti';
+    d.textContent=em[i%em.length];
+    d.style.left=(i*4)+'%'; d.style.animationDelay=(i%6*0.12)+'s';
+    document.body.appendChild(d); setTimeout(()=>d.remove(),2800);
+  }
+}
+
+/* ---------- CONTENT ---------- */
+const QUIZ = {
+  docs:[
+    {type:'mc', q:'Что оформить заранее для въезда во Вьетнам?',
+     a:[{em:'🛂',t:'Электронную визу (e-visa) онлайн',c:true},
+        {em:'🎫',t:'Ничего, визу дают всем на границе бесплатно'},
+        {em:'📮',t:'Бумажную визу по почте за 2 месяца'}],
+     exp:'Для многих стран нужна <b>e-visa</b> — оформляется онлайн на официальном сайте, стоит ~25$, приходит на почту. Распечатай её!'},
+    {type:'mc', q:'Сколько должен действовать загранпаспорт на въезде?',
+     a:[{em:'📅',t:'Хватит пары дней',},
+        {em:'✅',t:'Минимум 6 месяцев с даты въезда',c:true},
+        {em:'♾️',t:'Срок не важен'}],
+     exp:'Стандарт для Азии — паспорт действителен <b>ещё минимум 6 месяцев</b>. Иначе не пустят на рейс.'},
+    {type:'mc', q:'Что обязательно взять, кроме паспорта?',
+     a:[{em:'🏥',t:'Медицинскую страховку',c:true},
+        {em:'💍',t:'Свидетельство о браке'},
+        {em:'🐕',t:'Ветпаспорт'}],
+     exp:'Медицина для туристов платная. <b>Страховка</b> обязательна для спокойствия — лечение без неё дорогое.'},
+    {type:'mc', q:'Как лучше хранить документы в поездке?',
+     a:[{em:'📱',t:'Фото/сканы в телефоне и облаке + копии отдельно',c:true},
+        {em:'👛',t:'Всё оригиналами в одном кармане'},
+        {em:'🏨',t:'Отдать на ресепшн навсегда'}],
+     exp:'Сделай <b>фото и сканы</b> паспорта, визы, страховки. Оригиналы — в сейф отеля, с собой носи копию.'},
+  ],
+  money:[
+    {type:'mc', q:'Как называется валюта Вьетнама?',
+     a:[{em:'💵',t:'Вьетнамский донг (VND)',c:true},
+        {em:'💴',t:'Вьетнамская йена'},
+        {em:'💶',t:'Донг-евро'}],
+     exp:'Валюта — <b>донг (₫)</b>. 1 доллар ≈ 25 000 донгов, так что в кошельке будут «миллионы».'},
+    {type:'mc', q:'Кофе на улице стоит 25 000 донгов. Это примерно…',
+     a:[{em:'😱',t:'25 долларов — грабёж!'},
+        {em:'☕',t:'около 1 доллара',c:true},
+        {em:'💰',t:'250 долларов'}],
+     exp:'Делишь на 25 000 → ~1$. Лайфхак: <b>убери три нуля и раздели на 25</b>. 100 000₫ ≈ 4$.'},
+    {type:'mc', q:'Купюра 500 000 донгов — это…',
+     a:[{em:'🤑',t:'самая крупная, ~20$, будь внимателен',c:true},
+        {em:'🪙',t:'мелочь на сдачу'},
+        {em:'🎰',t:'сувенирные деньги'}],
+     exp:'<b>500 000₫ (~20$)</b> и <b>20 000₫ (~0,8$)</b> похожи по цвету — легко перепутать. Проверяй нули!'},
+    {type:'mc', q:'Как выгоднее платить и снимать деньги?',
+     a:[{em:'🏧',t:'Немного налички + снимать в банкоматах, торговаться на рынках',c:true},
+        {em:'💳',t:'Везде только картой, налички не надо'},
+        {em:'🧧',t:'Менять всё в аэропорту по любому курсу'}],
+     exp:'Рынки и уличная еда — <b>кэш</b>. В аэропорту курс плохой: меняй в городе/банкомате. На рынке <b>торгуйся</b> — это норма.'},
+  ],
+  lang:[
+    {type:'match', q:'Соедини вьетнамские фразы с переводом:',
+     pairs:[['Xin chào','Привет'],['Cảm ơn','Спасибо'],['Bao nhiêu?','Сколько стоит?'],['Ngon','Вкусно']],
+     exp:'«Xin chào» (син чао) и «Cảm ơn» (кам он) — твои главные слова. Улыбка + пара слов = скидка и симпатия.'},
+    {type:'mc', q:'Тебе говорят «Cảm ơn». Что ответить?',
+     a:[{em:'🙏',t:'Không có gì — «не за что»',c:true},
+        {em:'🍜',t:'Phở — это суп'},
+        {em:'🚕',t:'Grab — это такси'}],
+     exp:'«Không có gì» (хонг ко зи) — «пожалуйста / не за что». Вежливость вьетнамцы очень ценят.'},
+    {type:'match', q:'Ещё полезные слова — соедини:',
+     pairs:[['Phở','Суп с лапшой'],['Cà phê','Кофе'],['Nước','Вода'],['Không','Нет']],
+     exp:'«Không» (хонг) = нет — пригодится, чтобы отказаться от навязчивых продавцов. «Nước» — вода.'},
+  ],
+  food:[
+    {type:'swipe', em:'🍜', nm:'Фо (Phở)', sub:'Суп с лапшой из уличной кафешки, где очередь', good:true,
+     exp:'Где <b>очередь местных</b> и большой оборот — там свежо и безопасно. Фо — must try №1.'},
+    {type:'swipe', em:'🧊', nm:'Лёд в напитке у случайного лотка', sub:'Прозрачный лёд «трубочкой» обычно ок, мутный — нет', good:true,
+     exp:'Заводской лёд с дырочкой — безопасен и повсюду. Осторожнее с <b>мутным колотым</b> льдом из непонятных мест.'},
+    {type:'swipe', em:'🚰', nm:'Вода из-под крана', sub:'Почистить зубы, попить', good:false,
+     exp:'Водопроводную воду <b>не пьют</b>. Только бутилированная. Так избежишь проблем с животом.'},
+    {type:'swipe', em:'🥗', nm:'Немытые фрукты/салат с сомнительного лотка', sub:'', good:false,
+     exp:'Сырое, что мыли неизвестной водой — риск. Бери <b>фрукты, которые чистишь сам</b> (банан, манго).'},
+    {type:'swipe', em:'☕', nm:'Кофе со сгущёнкой (cà phê sữa đá)', sub:'Крепкий, сладкий, со льдом', good:true,
+     exp:'Легендарный <b>вьетнамский кофе</b>. Обязательно попробуй — и эгг-кофе в Ханое!'},
+  ],
+  road:[
+    {type:'mc', q:'Тебе надо перейти дорогу, а поток мотобайков не кончается. Что делать?',
+     a:[{em:'🚶',t:'Идти медленно и равномерно — тебя объедут',c:true},
+        {em:'🏃',t:'Дождаться пустой дороги (её не будет) '},
+        {em:'😨',t:'Резко перебегать и останавливаться'}],
+     exp:'Секрет Вьетнама: иди <b>ровно и предсказуемо</b>, не дёргайся — байки объезжают. Резкие движения опаснее.'},
+    {type:'mc', q:'Как безопаснее всего вызвать такси?',
+     a:[{em:'📲',t:'Через приложение Grab — цена фиксирована',c:true},
+        {em:'✋',t:'Ловить с улицы и договариваться на глаз'},
+        {em:'🚶',t:'Соглашаться на первого зазывалу у аэропорта'}],
+     exp:'<b>Grab</b> (такси/байк) показывает цену заранее — не обманут. Установи приложение до поездки.'},
+    {type:'mc', q:'Хочешь взять байк напрокат. Что важно?',
+     a:[{em:'🪖',t:'Шлем, международные права и осторожность',c:true},
+        {em:'🩴',t:'Ничего, все ездят как хотят'},
+        {em:'🌙',t:'Кататься ночью по трассе для драйва'}],
+     exp:'Без прав и опыта — рискованно и незаконно (штраф, страховка не покроет). Есть опыт — <b>только в шлеме</b>.'},
+  ],
+  culture:[
+    {type:'mc', q:'Заходишь в буддийский храм. Как одеться?',
+     a:[{em:'👕',t:'Закрыть плечи и колени',c:true},
+        {em:'🩳',t:'Шорты и майка — жарко же'},
+        {em:'👙',t:'Прямо в купальнике с пляжа'}],
+     exp:'В храмах — <b>прикрытые плечи и колени</b>, обувь снимают у входа. Уважение к святыням очень важно.'},
+    {type:'mc', q:'Тебе что-то дают или ты платишь. Как вежливее?',
+     a:[{em:'🙌',t:'Двумя руками',c:true},
+        {em:'👈',t:'Небрежно одной рукой'},
+        {em:'🦶',t:'Пнуть по столу'}],
+     exp:'Передавать и принимать деньги/визитки <b>двумя руками</b> — знак уважения в азиатской культуре.'},
+    {type:'mc', q:'Что считается грубым?',
+     a:[{em:'😤',t:'Кричать и публично злиться, «терять лицо»',c:true},
+        {em:'🙂',t:'Улыбаться и торговаться спокойно'},
+        {em:'🙏',t:'Говорить «cảm ơn»'}],
+     exp:'Публичный гнев — табу: важно <b>«сохранять лицо»</b>. Улыбка и спокойствие решают почти всё.'},
+    {type:'mc', q:'Трогать человека за голову, особенно ребёнка —',
+     a:[{em:'🚫',t:'нежелательно, голова «священна»',c:true},
+        {em:'👍',t:'нормальный жест дружбы'},
+        {em:'🤝',t:'обязательное приветствие'}],
+     exp:'Голова считается <b>священной</b> частью тела — гладить по голове не принято, даже детей.'},
+  ],
+  scam:[
+    {type:'mc', q:'Таксист говорит «счётчик сломан, 500 000₫ до отеля». Ты…',
+     a:[{em:'📲',t:'Выходишь и вызываешь Grab с фикс. ценой',c:true},
+        {em:'😅',t:'Платишь, чтобы не спорить'},
+        {em:'😴',t:'Даёшь ему карту и pin'}],
+     exp:'Классика развода. Настаивай на счётчике или <b>Grab</b>. Реальная цена обычно в разы меньше.'},
+    {type:'mc', q:'На рынке первая цена футболки — 400 000₫. Что делать?',
+     a:[{em:'🤝',t:'Спокойно торговаться, начав с ~30-40%',c:true},
+        {em:'💸',t:'Платить сразу — неудобно спорить'},
+        {em:'😡',t:'Возмущаться и ругаться'}],
+     exp:'Торг — <b>часть культуры</b>. Начни с трети цены, улыбайся. Не хочешь платить — просто уйди, часто догонят со скидкой.'},
+    {type:'mc', q:'Тебе дают «бесплатно» примерить браслет / сфоткаться с коромыслом. Итог?',
+     a:[{em:'💰',t:'Потом требуют деньги — вежливо откажись сразу',c:true},
+        {em:'🎁',t:'Это правда бесплатный подарок'},
+        {em:'🤗',t:'Так знакомятся местные'}],
+     exp:'«Бесплатно» на улице часто = <b>требование денег</b> потом. Не бери в руки и не примеряй, если не готов купить.'},
+    {type:'mc', q:'Проверяешь сдачу, а вместо 500 000₫ дали 20 000₫ (похожи). Ты…',
+     a:[{em:'🔍',t:'Всегда пересчитываешь купюры при получении',c:true},
+        {em:'🏃',t:'Уходишь не глядя'},
+        {em:'🤷',t:'Нули не важны'}],
+     exp:'20 000₫ и 500 000₫ похожи по цвету. <b>Считай сдачу на месте</b> — «ошибки» случаются часто.'},
+  ],
+};
+
+const TIPS = {
+  docs:'💡 Совет: распечатай e-visa и бронь отеля — на паспортном контроле иногда просят бумагу.',
+  money:'💡 Формула в уме: убери 3 нуля и раздели на 25. 200 000₫ → 200/25 ≈ 8$.',
+  lang:'💡 Даже 3-4 слова + улыбка заметно улучшают отношение и цены. Скачай Google Translate офлайн.',
+  food:'💡 Правило улицы: много местных + большой оборот = вкусно и безопасно.',
+  road:'💡 Установи Grab и офлайн-карты до вылета. Дорогу переходи ровным шагом.',
+  culture:'💡 Спокойствие и улыбка — суперсила во Вьетнаме. Гнев только вредит.',
+  scam:'💡 Grab, счёт деньгам и лёгкий торг закрывают 90% туристических разводов.',
+};
+
+renderMap();
+</script>
+</body>
+</html>
