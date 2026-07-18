@@ -132,11 +132,13 @@
         <span class="pill">🍜 Еда</span><span class="pill">🛵 Дорога</span><span class="pill">🙏 Этикет</span>
       </div>
       <p style="margin-top:16px;font-weight:800;color:var(--ink)">Кто играет?</p>
-      <div style="display:flex;gap:12px">
+      <div style="display:flex;gap:10px">
         <button class="btn gold" style="margin-top:6px" onclick="pickPlayer('Костя')">👨 Костя</button>
         <button class="btn gold" style="margin-top:6px" onclick="pickPlayer('Юля')">👩 Юля</button>
+        <button class="btn gold" style="margin-top:6px" onclick="pickPlayer('Ама')">🧕 Ама</button>
       </div>
-      <div class="foot">7 уровней · собери все звёзды · получи «паспорт готовности»</div>
+      <button class="btn ghost sm" onclick="go('board')">🏆 Турнирная таблица</button>
+      <div class="foot">3 игрока · 7 уровней · кто наберёт больше звёзд — тот победил</div>
     </div>
   </section>
 
@@ -199,6 +201,18 @@
         </div>
       </div>
       <button class="btn gold" onclick="restart()">Сыграть заново 🔁</button>
+      <button class="btn ghost sm" onclick="go('board')">🏆 Турнирная таблица</button>
+    </div>
+  </section>
+
+  <!-- TOURNAMENT BOARD -->
+  <section id="s-board" class="screen">
+    <div class="card">
+      <h2 style="text-align:center">🏆 Турнирная таблица</h2>
+      <p style="text-align:center;margin-top:0">Кто лучше готов к Вьетнаму</p>
+      <div id="boardList"></div>
+      <div class="hint">Каждый уровень — до 3★. Максимум 21★ (100%).</div>
+      <button class="btn" onclick="go('start')">← Выбрать игрока</button>
     </div>
   </section>
 
@@ -238,6 +252,8 @@ function pickPlayer(name){
   go('map');
 }
 
+const PLAYERS = [{n:'Костя',em:'👨'},{n:'Юля',em:'👩'},{n:'Ама',em:'🧕'}];
+
 /* ---------- nav ---------- */
 function go(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -245,9 +261,52 @@ function go(name){
   window.scrollTo(0,0);
   if(name==='map') renderMap();
   if(name==='final') renderFinal();
+  if(name==='board') renderBoard();
 }
 function totalStars(){ return Object.values(progress).reduce((a,b)=>a+b,0); }
 function maxStars(){ return LEVELS.length*3; }
+function starsOf(name){
+  let p={}; try{p=JSON.parse(localStorage.getItem('vn_prog_'+name)||'{}');}catch(e){}
+  return Object.values(p).reduce((a,b)=>a+b,0);
+}
+function levelsDoneOf(name){
+  let p={}; try{p=JSON.parse(localStorage.getItem('vn_prog_'+name)||'{}');}catch(e){}
+  return Object.keys(p).length;
+}
+
+function renderBoard(){
+  const rows = PLAYERS.map(p=>({...p, st:starsOf(p.n), done:levelsDoneOf(p.n)}));
+  rows.sort((a,b)=> b.st-a.st || b.done-a.done);
+  const leader = rows[0].st;
+  const someoneStarted = rows.some(r=>r.st>0 || r.done>0);
+  const medals=['🥇','🥈','🥉'];
+  const el = document.getElementById('boardList'); el.innerHTML='';
+  rows.forEach((r,i)=>{
+    const pct = Math.round(r.st/maxStars()*100);
+    const isLeader = someoneStarted && r.st===leader && r.st>0;
+    const row = document.createElement('div');
+    row.className='node';
+    row.style.cssText='box-shadow:none;background:#f4f8f6;margin-top:10px;'+(isLeader?'border:2px solid var(--gold);background:#fffceb;':'border:2px solid transparent;');
+    row.innerHTML = `
+      <div class="ic">${someoneStarted? medals[i] : '▫️'}</div>
+      <div>
+        <div class="t">${r.em} ${r.n} ${r.done===LEVELS.length && r.st===maxStars()?'👑':''}</div>
+        <div class="s">${r.done}/${LEVELS.length} уровней · ${pct}% готовности</div>
+      </div>
+      <div class="chk stars" style="font-size:15px">★ ${r.st}</div>`;
+    el.appendChild(row);
+  });
+  const note = document.createElement('div');
+  note.style.cssText='text-align:center;margin-top:14px;font-weight:800;color:var(--bg2)';
+  if(!someoneStarted){
+    note.textContent='Ещё никто не играл — выберите игрока и вперёд!';
+  } else if(rows[0].st===rows[1].st){
+    note.textContent='⚔️ Пока ничья за первое место!';
+  } else {
+    note.innerHTML='👑 Лидирует '+rows[0].em+' <b>'+rows[0].n+'</b>!';
+  }
+  el.appendChild(note);
+}
 
 function renderMap(){
   const done = LEVELS.filter(l=>progress[l.id]!==undefined).length;
@@ -429,7 +488,8 @@ function afterDone(){
 
 function renderFinal(){
   const nameEl=document.getElementById('fName');
-  if(nameEl) nameEl.textContent = player? player+', ты готов'+(player==='Юля'?'а':'')+' к Вьетнаму!' : 'Ты готов(а) к Вьетнаму!';
+  const fem = (player==='Юля'||player==='Ама');
+  if(nameEl) nameEl.textContent = player? player+', ты готов'+(fem?'а':'')+' к Вьетнаму!' : 'Ты готов(а) к Вьетнаму!';
   const st=totalStars();
   document.getElementById('fStars').textContent = st;
   const pct = Math.round(st/maxStars()*100);
